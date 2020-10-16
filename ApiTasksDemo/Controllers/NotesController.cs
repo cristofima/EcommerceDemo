@@ -1,4 +1,5 @@
-﻿using ApiTasksDemo.Models;
+﻿using ApiTasksDemo.DTO.Requests;
+using ApiTasksDemo.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -72,15 +73,42 @@ namespace ApiTasksDemo.Controllers
         }
 
         // POST: api/Notes
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<Note>> PostNote(Note note)
+        public async Task<ActionResult<Note>> PostNote(NoteRequest request)
         {
-            _context.Notes.Add(note);
+            Note note;
+
+            if (request.NoteId <= 0)
+            {
+                note = new Note
+                {
+                    Description = request.Description,
+                    ExpirationDate = request.ExpirationDate,
+                    IsCompleted = request.IsCompleted,
+                    Priority = request.Priority,
+                    Title = request.Title
+                };
+
+                _context.Notes.Add(note);
+            }
+            else
+            {
+                note = _context.Notes.Find(request.NoteId);
+                if (note != null)
+                {
+                    note.Description = request.Description;
+                    note.ExpirationDate = request.ExpirationDate;
+                    note.IsCompleted = request.IsCompleted;
+                    note.Priority = request.Priority;
+                    note.Title = request.Title;
+
+                    _context.Update(note);
+                }
+            }
+
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetNote", new { id = note.NoteId }, note);
+            return Ok(note);
         }
 
         // DELETE: api/Notes/5
