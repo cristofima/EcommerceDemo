@@ -122,7 +122,7 @@ namespace ApiTasksDemo.Controllers
             _context.Notes.Remove(note);
             await _context.SaveChangesAsync();
 
-            return note;
+            return NoContent();
         }
 
         private bool NoteExists(int id)
